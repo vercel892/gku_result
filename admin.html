@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — GKU Result System</title>
+  <link rel="icon" href="https://www.gku.ac.in/public/frontend/images/join-logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0B1120;
+      --sidebar: #111827;
+      --card: #1E293B;
+      --card2: #243044;
+      --border: rgba(255, 255, 255, 0.08);
+      --primary: #7B0D1E;
+      --pri-light: #A52632;
+      --gold: #F59E0B;
+      --text: #F1F5F9;
+      --muted: #94A3B8;
+      --success: #10B981;
+      --danger: #EF4444;
+      --warning: #F59E0B;
+      --info: #38BDF8;
+      --radius: 10px;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; word-break: break-word; }
+
+    /* ── Scrollbar ────────────────────────────────────────── */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+
+    /* ── Layout ───────────────────────────────────────────── */
+    #sidebar {
+      width: 260px;
+      min-height: 100vh;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      transition: transform .3s;
+    }
+
+    #main-content {
+      margin-left: 260px;
+      flex: 1;
+      min-height: 100vh;
+      padding: 28px 32px;
+    }
+
+    /* ── Sidebar ──────────────────────────────────────────── */
+    .sidebar-brand {
+      padding: 22px 20px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-brand img {
+      height: 44px;
+      filter: brightness(0) invert(1);
+    }
+
+    .sidebar-brand-text h2 { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-brand-text p { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .sidebar-nav {
+      padding: 16px 12px;
+      flex: 1;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 10px 8px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+      margin-bottom: 4px;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-item i {
+      width: 18px;
+      text-align: center;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, var(--primary), var(--pri-light));
+      color: #fff;
+    }
+
+    .nav-item.active i {
+      color: #fff;
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .sidebar-footer strong {
+      color: var(--text);
+      display: block;
+    }
+
+    /* ── Login screen ─────────────────────────────────────── */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 44px 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--shadow);
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .login-logo img {
+      height: 60px;
+      filter: brightness(0) invert(1);
+    }
+
+    .login-logo h1 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-top: 12px;
+    }
+
+    .login-logo p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .badge-admin {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      font-size: 10px;
+      padding: 2px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 8px;
+    }
+
+    /* ── Form elements ────────────────────────────────────── */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border .2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+    }
+
+    .form-control::placeholder {
+      color: #475569;
+    }
+
+    .form-control option {
+      background: var(--card);
+    }
+
+    select.form-control {
+      cursor: pointer;
+    }
+
+    /* ── Buttons ──────────────────────────────────────────── */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--pri-light));
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      opacity: .9;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .btn-success:hover {
+      opacity: .88;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      opacity: .88;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .btn-block {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* ── Cards & Sections ────────────────────────────────── */
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-header h1 {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .page-header p {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title i {
+      color: var(--primary);
+    }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: center; }
+
+    .stat-card .stat-val {
+      font-size: 32px;
+      font-weight: 800;
+    }
+
+    .stat-card .stat-lab {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .stat-card .stat-icon {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .stat-card.primary .stat-val {
+      color: var(--pri-light);
+    }
+
+    .stat-card.success .stat-val {
+      color: var(--success);
+    }
+
+    .stat-card.gold .stat-val {
+      color: var(--gold);
+    }
+
+    /* ── Table ────────────────────────────────────────────── */
+    .tbl-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    table th { padding: 12px 14px; text-align: left; background: rgba(255,255,255,0.04); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    table td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+
+    table tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .tbl-empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 32px;
+      font-size: 13px;
+    }
+
+    /* ── Badges ───────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-pass {
+      background: rgba(16, 185, 129, .15);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, .3);
+    }
+
+    .badge-fail {
+      background: rgba(239, 68, 68, .15);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, .3);
+    }
+
+    .badge-marks {
+      background: rgba(56, 189, 248, .12);
+      color: var(--info);
+      border: 1px solid rgba(56, 189, 248, .25);
+    }
+
+    .badge-pdf {
+      background: rgba(245, 158, 11, .12);
+      color: var(--gold);
+      border: 1px solid rgba(245, 158, 11, .25);
+    }
+
+    .badge-hold {
+      background: rgba(148, 163, 184, .1);
+      color: var(--muted);
+      border: 1px solid rgba(148, 163, 184, .2);
+    }
+
+    /* ── Tabs ─────────────────────────────────────────────── */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      background: var(--card2);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 22px;
+      width: fit-content;
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      color: var(--muted);
+      background: none;
+      transition: all .2s;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--pri-light));
+      color: #fff;
+    }
+
+    /* ── Subject rows ─────────────────────────────────────── */
+    .subject-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+    }
+
+    .subject-table th {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 6px 8px;
+      background: rgba(255, 255, 255, 0.03);
+      text-align: left;
+    }
+
+    .subject-table td {
+      padding: 5px 4px;
+    }
+
+    .subject-table input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 7px 10px;
+      width: 100%;
+      font-size: 13px;
+    }
+
+    .subject-table input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .sub-del-btn {
+      background: rgba(239, 68, 68, .15);
+      color: var(--danger);
+      border: none;
+      border-radius: 5px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+    /* ── Summary bar ─────────────────────────────────────── */
+    .marks-summary {
+      display: flex;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .marks-summary span {
+      color: var(--muted);
+    }
+
+    .marks-summary strong {
+      color: var(--text);
+    }
+
+    /* ── PDF upload zone ──────────────────────────────────── */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 36px 24px;
+      text-align: center;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .25s;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary);
+      color: var(--text);
+      background: rgba(123, 13, 30, .08);
+    }
+
+    .drop-zone i {
+      font-size: 36px;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .drop-zone p {
+      font-size: 14px;
+    }
+
+    .drop-zone small {
+      font-size: 12px;
+    }
+
+    #pdf-name-display {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--success);
+      display: none;
+    }
+
+    /* ── Toast ────────────────────────────────────────────── */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      min-width: 280px;
+      max-width: 380px;
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn .3s ease;
+      border-left: 4px solid;
+    }
+
+    .toast-success {
+      background: #0F2E24;
+      border-color: var(--success);
+      color: #6EE7B7;
+    }
+
+    .toast-error {
+      background: #2D0F0F;
+      border-color: var(--danger);
+      color: #FCA5A5;
+    }
+
+    .toast-info {
+      background: #0C1F2E;
+      border-color: var(--info);
+      color: #7DD3FC;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+
+      to {
+        transform: none;
+        opacity: 1;
+      }
+    }
+
+    /* ── Search / filter ──────────────────────────────────── */
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .search-bar .form-control {
+      max-width: 280px;
+    }
+
+    /* ── Page visibility ──────────────────────────────────── */
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    /* ── Confirm modal ────────────────────────────────────── */
+    #confirm-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+      z-index: 9990;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #confirm-modal.show {
+      display: flex;
+    }
+
+    .confirm-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 30px 28px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .confirm-box h3 {
+      font-size: 17px;
+      margin-bottom: 8px;
+    }
+
+    .confirm-box p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 22px;
+    }
+
+    .confirm-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    /* ── Responsive ───────────────────────────────────────── */
+    @media (max-width: 768px) {
+      #sidebar {
+        transform: translateX(-100%);
+      }
+
+      #sidebar.open {
+        transform: translateX(0);
+      }
+
+      #main-content {
+        margin-left: 0;
+        padding: 20px 16px;
+      }
+
+      .stat-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* ── Grid ─────────────────────────────────────────────── */
+    .row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .col-6 { flex: 1; min-width: 320px; max-width: 100%; }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Toast Container ─────────────────────────────────── -->
+  <div id="toast-container"></div>
+
+  <!-- ── Confirm Modal ───────────────────────────────────── -->
+  <div id="confirm-modal">
+    <div class="confirm-box">
+      <h3 id="confirm-title">Confirm Action</h3>
+      <p id="confirm-msg">Are you sure you want to proceed?</p>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+        <button class="btn btn-danger" id="confirm-ok-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ LOGIN ═══════════════════════ -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <img src="https://www.gku.ac.in/public/frontend/images/logo.webp" alt="GKU Logo"
+          onerror="this.style.display='none'">
+        <h1>GKU Result System</h1>
+        <p>Guru Kashi University, Talwandi Sabo</p>
+        <span class="badge-admin">Admin Portal</span>
+      </div>
+      <div id="login-error"
+        style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#FCA5A5;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none;">
+      </div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="adm-username" class="form-control" placeholder="admin" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="adm-password" class="form-control" placeholder="••••••••"
+          autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-block" id="login-btn" onclick="adminLogin()">
+        <i class="fa fa-sign-in-alt"></i> Sign In
+      </button>
+      <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:16px;">Default: admin / admin123</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ SIDEBAR ════════════════════ -->
+  <aside id="sidebar">
+    <div class="sidebar-brand">
+      <img src="https://www.gku.ac.in/public/frontend/images/logo.webp" alt="GKU" onerror="this.style.display='none'">
+      <div class="sidebar-brand-text">
+        <h2>GKU Results</h2>
+        <p>Admin Dashboard</p>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <button class="nav-item active" onclick="showPage('dashboard')"><i class="fa fa-chart-pie"></i> Dashboard</button>
+      <button class="nav-item" onclick="showPage('students')"><i class="fa fa-users"></i> Students</button>
+      <button class="nav-item" onclick="showPage('upload')"><i class="fa fa-upload"></i> Upload Results</button>
+      <button class="nav-item" onclick="showPage('results')"><i class="fa fa-list-alt"></i> View Results</button>
+      <div class="nav-section-label" style="margin-top:12px;">System</div>
+      <button class="nav-item" onclick="adminLogout()"><i class="fa fa-sign-out-alt"></i> Logout</button>
+    </nav>
+    <div class="sidebar-footer">
+      <strong id="sidebar-admin-name">–</strong>
+      Signed in as Administrator
+    </div>
+  </aside>
+
+  <!-- ════════════════════ MAIN CONTENT ══════════════════ -->
+  <main id="main-content" style="display:none;">
+
+    <!-- ── DASHBOARD ────────────────────────────────────── -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>Overview of the GKU Result Management System</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card primary">
+          <div class="stat-icon">🎓</div>
+          <div class="stat-val" id="stat-students">–</div>
+          <div class="stat-lab">Total Students</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-icon">📋</div>
+          <div class="stat-val" id="stat-results">–</div>
+          <div class="stat-lab">Results Published</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon">🏫</div>
+          <div class="stat-val">GKU</div>
+          <div class="stat-lab">NAAC A++ University</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fa fa-clock"></i> Recent Uploads</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Roll No</th>
+                <th>Semester</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="recent-table">
+              <tr>
+                <td colspan="5" class="tbl-empty">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STUDENTS ──────────────────────────────────────── -->
+    <div id="page-students" class="page">
+      <div class="page-header">
+        <h1>Students</h1>
+        <p>Manage student accounts and credentials</p>
+      </div>
+
+      <!-- Add Student Form -->
+      <div class="card" id="add-student-card">
+        <div class="card-title"><i class="fa fa-user-plus"></i> Add New Student</div>
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label>Roll No./University No. <span style="color:var(--danger)">*</span></label>
+              <input type="text" id="s-roll" class="form-control" placeholder="e.g. GKU2024001">
+            </div>
+            <div class="form-group">
+              <label>Full Name <span style="color:var(--danger)">*</span></label>
+              <input type="text" id="s-name" class="form-control" placeholder="Student's full name">
+            </div>
+            <div class="form-group">
+              <label>Login Password <span style="color:var(--danger)">*</span></label>
+              <input type="text" id="s-pass" class="form-control" placeholder="Set a password for this student">
+            </div>
+            <div class="form-group">
+              <label>Father's Name</label>
+              <input type="text" id="s-father" class="form-control" placeholder="Father's name">
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Course / Programme</label>
+              <input type="text" id="s-course" class="form-control" placeholder="e.g. B.Tech, BBA, M.Sc">
+            </div>
+            <div class="form-group">
+              <label>Branch / Department</label>
+              <input type="text" id="s-branch" class="form-control" placeholder="e.g. Computer Science Engineering">
+            </div>
+            <div class="form-group">
+              <label>Batch Year</label>
+              <input type="text" id="s-batch" class="form-control" placeholder="e.g. 2024">
+            </div>
+            <div class="form-group">
+              <label>Email (optional)</label>
+              <input type="email" id="s-email" class="form-control" placeholder="student@email.com">
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="add-student-btn" onclick="addStudent()">
+          <i class="fa fa-plus"></i> Add Student
+        </button>
+      </div>
+
+      <!-- Students Table -->
+      <div class="card">
+        <div class="card-title"><i class="fa fa-table"></i> All Students</div>
+        <div class="search-bar">
+          <input type="text" id="student-search" class="form-control" placeholder="🔍  Search by name or roll number…"
+            oninput="filterStudents()">
+          <button class="btn btn-ghost btn-sm" onclick="loadStudents()"><i class="fa fa-sync"></i> Refresh</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Course</th>
+                <th>Branch</th>
+                <th>Batch</th>
+                <th>Added</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="students-table">
+              <tr>
+                <td colspan="8" class="tbl-empty">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── UPLOAD RESULTS ────────────────────────────────── -->
+    <div id="page-upload" class="page">
+      <div class="page-header">
+        <h1>Upload Results</h1>
+        <p>Add or update semester-wise results for a student</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="fa fa-cog"></i> Select Student & Semester</div>
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label>Student <span style="color:var(--danger)">*</span></label>
+              <select id="ur-student" class="form-control" onchange="onStudentSelect()">
+                <option value="">– Select student –</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Semester <span style="color:var(--danger)">*</span></label>
+              <select id="ur-semester" class="form-control">
+                <option value="">– Select semester –</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Exam Session</label>
+              <input type="text" id="ur-session" class="form-control" placeholder="e.g. Nov/Dec 2024">
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Declaration Date</label>
+              <input type="date" id="ur-date" class="form-control">
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Result Status</label>
+              <select id="ur-status" class="form-control">
+                <option value="Pass">Pass</option>
+                <option value="Fail">Fail</option>
+                <option value="Withheld">Withheld</option>
+                <option value="Absent">Absent</option>
+                <option value="Result Awaited">Result Awaited</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label>Remarks (optional)</label>
+              <input type="text" id="ur-remarks" class="form-control" placeholder="Any additional notes">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Type selector -->
+      <div class="card">
+        <div class="card-title"><i class="fa fa-layer-group"></i> Result Type</div>
+        <div class="tab-bar">
+          <button class="tab-btn active" id="tab-marks" onclick="switchResultType('marks')">
+            <i class="fa fa-table"></i> Enter Marks
+          </button>
+          <button class="tab-btn" id="tab-pdf" onclick="switchResultType('pdf')">
+            <i class="fa fa-file-pdf"></i> Upload PDF
+          </button>
+        </div>
+
+        <!-- Marks entry -->
+        <div id="type-marks">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <p style="font-size:13px;color:var(--muted);">Enter subject-wise marks below. Grade is auto-calculated.</p>
+            <button class="btn btn-ghost btn-sm" onclick="addSubjectRow()"><i class="fa fa-plus"></i> Add
+              Subject</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="subject-table" id="subjects-tbl">
+              <thead>
+                <tr>
+                  <th style="width:35%">Subject Name</th>
+                  <th style="width:13%">Max Marks</th>
+                  <th style="width:13%">Pass Marks</th>
+                  <th style="width:13%">Obtained</th>
+                  <th style="width:12%">Grade</th>
+                  <th style="width:10%"></th>
+                </tr>
+              </thead>
+              <tbody id="subjects-body"></tbody>
+            </table>
+          </div>
+          <div class="marks-summary" id="marks-summary">
+            <span>Total Marks: <strong id="sum-total">0</strong></span>
+            <span>Obtained: <strong id="sum-obtained">0</strong></span>
+            <span>Percentage: <strong id="sum-pct">0.00%</strong></span>
+          </div>
+          <button class="btn btn-primary" style="margin-top:16px;" onclick="submitMarks()">
+            <i class="fa fa-save"></i> Save Result
+          </button>
+        </div>
+
+        <!-- PDF upload -->
+        <div id="type-pdf" style="display:none;">
+          <div class="drop-zone" id="drop-zone" onclick="document.getElementById('pdf-input').click()"
+            ondragover="event.preventDefault();this.classList.add('dragover')"
+            ondragleave="this.classList.remove('dragover')" ondrop="handleDrop(event)">
+            <i class="fa fa-file-pdf" style="color:var(--danger)"></i>
+            <p>Click to browse or drag & drop your PDF</p>
+            <small>Maximum file size: 10 MB</small>
+            <input type="file" id="pdf-input" accept="application/pdf" style="display:none"
+              onchange="handlePdfSelect(this)">
+          </div>
+          <div id="pdf-name-display"><i class="fa fa-check-circle"></i> <span id="pdf-filename"></span></div>
+          <button class="btn btn-primary" style="margin-top:16px;" onclick="submitPdf()">
+            <i class="fa fa-cloud-upload-alt"></i> Upload PDF Result
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW RESULTS ──────────────────────────────────── -->
+    <div id="page-results" class="page">
+      <div class="page-header">
+        <h1>View Results</h1>
+        <p>All published results across all students and semesters</p>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fa fa-search"></i> Filter Results</div>
+        <div class="search-bar">
+          <input type="text" id="results-search" class="form-control" placeholder="🔍  Search by roll no or name…"
+            oninput="filterResults()">
+          <select id="results-sem-filter" class="form-control" style="max-width:180px;" onchange="filterResults()">
+            <option value="">All Semesters</option>
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+            <option value="3">Semester 3</option>
+            <option value="4">Semester 4</option>
+            <option value="5">Semester 5</option>
+            <option value="6">Semester 6</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="loadResults()"><i class="fa fa-sync"></i> Refresh</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Semester</th>
+                <th>Type</th>
+                <th>Session</th>
+                <th>Percentage</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="results-table">
+              <tr>
+                <td colspan="9" class="tbl-empty">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main><!-- end #main-content -->
+
+  <script>
+    // ═══════════════════════════════════════════════════════════
+    //  CONFIG
+    // ═══════════════════════════════════════════════════════════
+    const API = 'http://localhost:3001';
+    let authToken = sessionStorage.getItem('gku_admin_token');
+    let allStudents = [];
+    let allResults = [];
+
+    // ═══════════════════════════════════════════════════════════
+    //  TOAST
+    // ═══════════════════════════════════════════════════════════
+    function toast(msg, type = 'info') {
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle' };
+      el.innerHTML = `<i class="fa ${icons[type] || icons.info}"></i> ${msg}`;
+      document.getElementById('toast-container').appendChild(el);
+      setTimeout(() => el.remove(), 4500);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  CONFIRM MODAL
+    // ═══════════════════════════════════════════════════════════
+    let confirmCb = null;
+    function confirmAction(title, msg, cb) {
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-msg').textContent = msg;
+      confirmCb = cb;
+      document.getElementById('confirm-modal').classList.add('show');
+    }
+    function closeConfirm() { document.getElementById('confirm-modal').classList.remove('show'); confirmCb = null; }
+    document.getElementById('confirm-ok-btn').onclick = () => { if (confirmCb) confirmCb(); closeConfirm(); };
+
+    // ═══════════════════════════════════════════════════════════
+    //  AUTH
+    // ═══════════════════════════════════════════════════════════
+    async function adminLogin() {
+      const username = document.getElementById('adm-username').value.trim();
+      const password = document.getElementById('adm-password').value;
+      const errEl = document.getElementById('login-error');
+      const btn = document.getElementById('login-btn');
+
+      errEl.style.display = 'none';
+      if (!username || !password) { errEl.textContent = 'Please enter username and password.'; errEl.style.display = 'block'; return; }
+
+      btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Signing in…';
+      try {
+        const r = await fetch(`${API}/api/admin/login`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const d = await r.json();
+        if (!r.ok) { errEl.textContent = d.error || 'Login failed.'; errEl.style.display = 'block'; return; }
+        authToken = d.token;
+        sessionStorage.setItem('gku_admin_token', authToken);
+        document.getElementById('sidebar-admin-name').textContent = d.username || 'Admin';
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+        initDashboard();
+      } catch { errEl.textContent = 'Cannot connect to server. Is it running on port 3001?'; errEl.style.display = 'block'; }
+      finally { btn.disabled = false; btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Sign In'; }
+    }
+
+    function adminLogout() {
+      authToken = null;
+      sessionStorage.removeItem('gku_admin_token');
+      document.getElementById('main-content').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('adm-password').value = '';
+    }
+
+    async function apiFetch(endpoint, opts = {}) {
+      const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}`, ...opts.headers };
+      const r = await fetch(`${API}${endpoint}`, { ...opts, headers });
+      if (r.status === 401) { adminLogout(); throw new Error('Session expired.'); }
+      return r;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  NAVIGATION
+    // ═══════════════════════════════════════════════════════════
+    function showPage(name) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(`page-${name}`).classList.add('active');
+      const idx = ['dashboard', 'students', 'upload', 'results'].indexOf(name);
+      document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
+      if (name === 'dashboard') initDashboard();
+      if (name === 'students') loadStudents();
+      if (name === 'upload') populateStudentDropdown();
+      if (name === 'results') loadResults();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  DASHBOARD
+    // ═══════════════════════════════════════════════════════════
+    async function initDashboard() {
+      try {
+        const r = await apiFetch('/api/admin/stats');
+        const d = await r.json();
+        document.getElementById('stat-students').textContent = d.total_students;
+        document.getElementById('stat-results').textContent = d.total_results;
+        const tbody = document.getElementById('recent-table');
+        if (!d.recent?.length) { tbody.innerHTML = '<tr><td colspan="5" class="tbl-empty">No results uploaded yet.</td></tr>'; return; }
+        tbody.innerHTML = d.recent.map(row => `
+      <tr>
+        <td>${row.name}</td>
+        <td><span style="font-family:monospace;color:var(--info)">${row.roll_no}</span></td>
+        <td>Sem ${row.semester}</td>
+        <td><span class="badge badge-${row.result_status === 'Pass' ? 'pass' : 'fail'}">${row.result_status}</span></td>
+        <td>${fmtDate(row.created_at)}</td>
+      </tr>`).join('');
+      } catch (e) { toast('Failed to load dashboard: ' + e.message, 'error'); }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  STUDENTS
+    // ═══════════════════════════════════════════════════════════
+    async function loadStudents() {
+      document.getElementById('students-table').innerHTML = '<tr><td colspan="8" class="tbl-empty">Loading…</td></tr>';
+      try {
+        const r = await apiFetch('/api/admin/students');
+        const d = await r.json();
+        allStudents = d.students || [];
+        renderStudentsTable(allStudents);
+      } catch (e) { toast('Failed to load students: ' + e.message, 'error'); }
+    }
+
+    function renderStudentsTable(list) {
+      const tbody = document.getElementById('students-table');
+      if (!list.length) { tbody.innerHTML = '<tr><td colspan="8" class="tbl-empty">No students found.</td></tr>'; return; }
+      tbody.innerHTML = list.map((s, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td><span style="font-family:monospace;color:var(--info);font-weight:700">${s.roll_no}</span></td>
+      <td>${s.name}</td>
+      <td>${s.course || '–'}</td>
+      <td>${s.branch || '–'}</td>
+      <td>${s.batch_year || '–'}</td>
+      <td>${fmtDate(s.created_at)}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="promptResetPw(${s.id}, '${escHtml(s.name)}')">
+          <i class="fa fa-key"></i>
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="deleteStudent(${s.id}, '${escHtml(s.name)}')">
+          <i class="fa fa-trash"></i>
+        </button>
+      </td>
+    </tr>`).join('');
+    }
+
+    function filterStudents() {
+      const q = document.getElementById('student-search').value.toLowerCase();
+      renderStudentsTable(allStudents.filter(s =>
+        s.roll_no.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
+      ));
+    }
+
+    async function addStudent() {
+      const roll = document.getElementById('s-roll').value.trim();
+      const name = document.getElementById('s-name').value.trim();
+      const pass = document.getElementById('s-pass').value.trim();
+      if (!roll || !name || !pass) { toast('Roll number, name and password are required.', 'error'); return; }
+
+      const btn = document.getElementById('add-student-btn');
+      btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Adding…';
+      try {
+        const r = await apiFetch('/api/admin/students', {
+          method: 'POST',
+          body: JSON.stringify({
+            roll_no: roll, name, password: pass,
+            father_name: document.getElementById('s-father').value.trim(),
+            course: document.getElementById('s-course').value.trim(),
+            branch: document.getElementById('s-branch').value.trim(),
+            batch_year: document.getElementById('s-batch').value.trim(),
+            email: document.getElementById('s-email').value.trim(),
+          })
+        });
+        const d = await r.json();
+        if (!r.ok) { toast(d.error, 'error'); return; }
+        toast('Student added successfully!', 'success');
+        ['s-roll', 's-name', 's-pass', 's-father', 's-course', 's-branch', 's-batch', 's-email'].forEach(id => document.getElementById(id).value = '');
+        loadStudents();
+        populateStudentDropdown();
+      } catch (e) { toast(e.message, 'error'); }
+      finally { btn.disabled = false; btn.innerHTML = '<i class="fa fa-plus"></i> Add Student'; }
+    }
+
+    function promptResetPw(id, name) {
+      const pw = prompt(`Set new password for "${name}":`);
+      if (!pw?.trim()) return;
+      apiFetch(`/api/admin/students/${id}/password`, {
+        method: 'PUT', body: JSON.stringify({ password: pw.trim() })
+      }).then(r => r.json()).then(d => {
+        if (d.error) toast(d.error, 'error');
+        else toast('Password updated!', 'success');
+      }).catch(e => toast(e.message, 'error'));
+    }
+
+    function deleteStudent(id, name) {
+      confirmAction('Delete Student', `Delete "${name}" and ALL their results? This cannot be undone.`, async () => {
+        try {
+          const r = await apiFetch(`/api/admin/students/${id}`, { method: 'DELETE' });
+          const d = await r.json();
+          if (d.error) toast(d.error, 'error');
+          else { toast('Student deleted.', 'success'); loadStudents(); }
+        } catch (e) { toast(e.message, 'error'); }
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  UPLOAD RESULTS
+    // ═══════════════════════════════════════════════════════════
+    async function populateStudentDropdown() {
+      try {
+        const r = await apiFetch('/api/admin/students');
+        const d = await r.json();
+        allStudents = d.students || [];
+        const sel = document.getElementById('ur-student');
+        sel.innerHTML = '<option value="">– Select student –</option>' +
+          allStudents.map(s => `<option value="${s.id}">${s.roll_no} — ${s.name}</option>`).join('');
+      } catch (e) { /* silent */ }
+    }
+
+    function onStudentSelect() { /* could prefill info */ }
+
+    let resultType = 'marks';
+    function switchResultType(type) {
+      resultType = type;
+      document.getElementById('type-marks').style.display = type === 'marks' ? 'block' : 'none';
+      document.getElementById('type-pdf').style.display = type === 'pdf' ? 'block' : 'none';
+      document.getElementById('tab-marks').classList.toggle('active', type === 'marks');
+      document.getElementById('tab-pdf').classList.toggle('active', type === 'pdf');
+    }
+
+    // Subject rows
+    let subjectRows = [];
+    function addSubjectRow(name = '', max = 100, pass = 35, obtained = '') {
+      const id = 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+      subjectRows.push(id);
+      const tr = document.createElement('tr');
+      tr.id = id;
+      tr.innerHTML = `
+    <td><input type="text"   class="sub-name" placeholder="Subject name" value="${escHtml(name)}" oninput="recalcTotals()"></td>
+    <td><input type="number" class="sub-max"  placeholder="100" value="${max}" min="1" oninput="recalcTotals()"></td>
+    <td><input type="number" class="sub-pass" placeholder="35"  value="${pass}" min="0" oninput="recalcTotals()"></td>
+    <td><input type="number" class="sub-obt"  placeholder="0"   value="${escHtml(String(obtained))}" min="0" oninput="recalcTotals()"></td>
+    <td><input type="text"   class="sub-grade" placeholder="Auto" readonly style="background:#0f172a;color:var(--gold);font-weight:700;cursor:not-allowed;"></td>
+    <td><button class="sub-del-btn" onclick="removeSubjectRow('${id}')"><i class="fa fa-times"></i></button></td>
+  `;
+      document.getElementById('subjects-body').appendChild(tr);
+      recalcTotals();
+    }
+
+    function removeSubjectRow(id) {
+      document.getElementById(id)?.remove();
+      subjectRows = subjectRows.filter(r => r !== id);
+      recalcTotals();
+    }
+
+    function recalcTotals() {
+      let total = 0, obtained = 0;
+      document.querySelectorAll('#subjects-body tr').forEach(tr => {
+        const max = parseFloat(tr.querySelector('.sub-max')?.value) || 0;
+        const obt = parseFloat(tr.querySelector('.sub-obt')?.value) || 0;
+        const gradeEl = tr.querySelector('.sub-grade');
+        total += max;
+        obtained += obt;
+        if (gradeEl) gradeEl.value = calcGrade(obt, max);
+      });
+      const pct = total > 0 ? ((obtained / total) * 100).toFixed(2) : '0.00';
+      document.getElementById('sum-total').textContent = total;
+      document.getElementById('sum-obtained').textContent = obtained;
+      document.getElementById('sum-pct').textContent = pct + '%';
+    }
+
+    function calcGrade(obt, max) {
+      if (!max) return '–';
+      const p = (obt / max) * 100;
+      if (p >= 90) return 'A+'; if (p >= 80) return 'A';
+      if (p >= 70) return 'B+'; if (p >= 60) return 'B';
+      if (p >= 50) return 'C+'; if (p >= 40) return 'C';
+      if (p >= 35) return 'P'; return 'F';
+    }
+
+    function collectSubjects() {
+      const rows = [];
+      document.querySelectorAll('#subjects-body tr').forEach(tr => {
+        const subject = tr.querySelector('.sub-name')?.value.trim();
+        const max = parseFloat(tr.querySelector('.sub-max')?.value) || 0;
+        const pass = parseFloat(tr.querySelector('.sub-pass')?.value) || 0;
+        const obt = parseFloat(tr.querySelector('.sub-obt')?.value) || 0;
+        const grade = tr.querySelector('.sub-grade')?.value || '';
+        if (subject) rows.push({ subject, max_marks: max, passing_marks: pass, obtained: obt, grade });
+      });
+      return rows;
+    }
+
+    async function submitMarks() {
+      const student_id = document.getElementById('ur-student').value;
+      const semester = document.getElementById('ur-semester').value;
+      if (!student_id || !semester) { toast('Please select student and semester.', 'error'); return; }
+      const subjects = collectSubjects();
+      if (!subjects.length) { toast('Please add at least one subject.', 'error'); return; }
+
+      const total = parseFloat(document.getElementById('sum-total').textContent) || 0;
+      const obtained = parseFloat(document.getElementById('sum-obtained').textContent) || 0;
+      const pct = total > 0 ? parseFloat(((obtained / total) * 100).toFixed(2)) : 0;
+
+      const body = {
+        student_id: parseInt(student_id), semester: parseInt(semester),
+        subjects, total_marks: total, obtained_marks: obtained, percentage: pct,
+        result_status: document.getElementById('ur-status').value,
+        exam_session: document.getElementById('ur-session').value.trim(),
+        declaration_date: document.getElementById('ur-date').value || null,
+        remarks: document.getElementById('ur-remarks').value.trim(),
+      };
+      try {
+        const r = await apiFetch('/api/admin/results', { method: 'POST', body: JSON.stringify(body) });
+        const d = await r.json();
+        if (!r.ok) { toast(d.error, 'error'); return; }
+        toast(d.message, 'success');
+        document.getElementById('subjects-body').innerHTML = '';
+        subjectRows = [];
+        recalcTotals();
+        // Add 5 blank rows by default
+        for (let i = 0; i < 3; i++) addSubjectRow();
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    // PDF upload
+    let selectedPdf = null;
+    function handlePdfSelect(input) {
+      if (!input.files[0]) return;
+      selectedPdf = input.files[0];
+      document.getElementById('pdf-name-display').style.display = 'block';
+      document.getElementById('pdf-filename').textContent = selectedPdf.name;
+    }
+    function handleDrop(e) {
+      e.preventDefault();
+      document.getElementById('drop-zone').classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (!file || file.type !== 'application/pdf') { toast('Please drop a PDF file.', 'error'); return; }
+      selectedPdf = file;
+      document.getElementById('pdf-name-display').style.display = 'block';
+      document.getElementById('pdf-filename').textContent = file.name;
+    }
+
+    async function submitPdf() {
+      const student_id = document.getElementById('ur-student').value;
+      const semester = document.getElementById('ur-semester').value;
+      if (!student_id || !semester) { toast('Please select student and semester.', 'error'); return; }
+      if (!selectedPdf) { toast('Please select a PDF file.', 'error'); return; }
+
+      const fd = new FormData();
+      fd.append('pdf', selectedPdf);
+      fd.append('student_id', student_id);
+      fd.append('semester', semester);
+      fd.append('result_status', document.getElementById('ur-status').value);
+      fd.append('exam_session', document.getElementById('ur-session').value.trim());
+      fd.append('declaration_date', document.getElementById('ur-date').value || '');
+      fd.append('remarks', document.getElementById('ur-remarks').value.trim());
+
+      try {
+        const r = await fetch(`${API}/api/admin/results/pdf`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${authToken}` },
+          body: fd
+        });
+        const d = await r.json();
+        if (!r.ok) { toast(d.error, 'error'); return; }
+        toast(d.message, 'success');
+        selectedPdf = null;
+        document.getElementById('pdf-input').value = '';
+        document.getElementById('pdf-name-display').style.display = 'none';
+      } catch (e) { toast(e.message, 'error'); }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  VIEW RESULTS
+    // ═══════════════════════════════════════════════════════════
+    async function loadResults() {
+      document.getElementById('results-table').innerHTML = '<tr><td colspan="9" class="tbl-empty">Loading…</td></tr>';
+      try {
+        const r = await apiFetch('/api/admin/results');
+        const d = await r.json();
+        allResults = d.results || [];
+        renderResultsTable(allResults);
+      } catch (e) { toast('Failed to load results: ' + e.message, 'error'); }
+    }
+
+    function renderResultsTable(list) {
+      const tbody = document.getElementById('results-table');
+      if (!list.length) { tbody.innerHTML = '<tr><td colspan="9" class="tbl-empty">No results found.</td></tr>'; return; }
+      tbody.innerHTML = list.map((r, i) => {
+        const statusBadge = { Pass: 'pass', Fail: 'fail', Withheld: 'hold', Absent: 'hold' }[r.result_status] || 'hold';
+        return `
+    <tr>
+      <td>${i + 1}</td>
+      <td><span style="font-family:monospace;color:var(--info);font-weight:700">${r.roll_no}</span></td>
+      <td>${r.name}</td>
+      <td style="text-align:center;font-weight:700">Sem ${r.semester}</td>
+      <td><span class="badge badge-${r.result_type === 'marks' ? 'marks' : 'pdf'}">${r.result_type.toUpperCase()}</span></td>
+      <td>${r.exam_session || '–'}</td>
+      <td>${r.percentage ? r.percentage + '%' : '–'}</td>
+      <td><span class="badge badge-${statusBadge}">${r.result_status}</span></td>
+      <td style="display:flex;gap:6px;">
+        ${r.result_type === 'pdf' && r.pdf_path ? `<a class="btn btn-ghost btn-sm" href="${API}${r.pdf_path}" target="_blank"><i class="fa fa-eye"></i></a>` : ''}
+        <button class="btn btn-danger btn-sm" onclick="deleteResult(${r.id})"><i class="fa fa-trash"></i></button>
+      </td>
+    </tr>`;
+      }).join('');
+    }
+
+    function filterResults() {
+      const q = document.getElementById('results-search').value.toLowerCase();
+      const sem = document.getElementById('results-sem-filter').value;
+      renderResultsTable(allResults.filter(r =>
+        (!q || r.roll_no.toLowerCase().includes(q) || r.name.toLowerCase().includes(q)) &&
+        (!sem || String(r.semester) === sem)
+      ));
+    }
+
+    function deleteResult(id) {
+      confirmAction('Delete Result', 'Are you sure you want to delete this result entry? This cannot be undone.', async () => {
+        try {
+          const r = await apiFetch(`/api/admin/results/${id}`, { method: 'DELETE' });
+          const d = await r.json();
+          if (d.error) toast(d.error, 'error');
+          else { toast('Result deleted.', 'success'); loadResults(); }
+        } catch (e) { toast(e.message, 'error'); }
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  UTILS
+    // ═══════════════════════════════════════════════════════════
+    function fmtDate(dt) {
+      if (!dt) return '–';
+      return new Date(dt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    function escHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+    // ═══════════════════════════════════════════════════════════
+    //  INIT — check if already logged in
+    // ═══════════════════════════════════════════════════════════
+    window.addEventListener('DOMContentLoaded', () => {
+      // Seed default subject rows
+      for (let i = 0; i < 3; i++) addSubjectRow();
+
+      if (authToken) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+        initDashboard();
+      }
+
+      // Enter key on login
+      document.getElementById('adm-password').addEventListener('keypress', e => {
+        if (e.key === 'Enter') adminLogin();
+      });
+    });
+  </script>
+</body>
+
+</html>
