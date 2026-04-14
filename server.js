@@ -473,9 +473,13 @@ async function initDefaults() {
 }
 
 // ── Start server ────────────────────────────────────────────────────────────
-app.listen(PORT, async () => {
-    log(`GKU Result System running on http://localhost:${PORT}`);
-    log(`  Main Site   →  http://localhost:${PORT}`);
-    log(`  Admin Panel →  http://localhost:${PORT}/admin`);
-    await initDefaults();
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    app.listen(PORT, async () => {
+        log(`GKU Result System running on http://localhost:${PORT}`);
+        log(`  Main Site   →  http://localhost:${PORT}`);
+        log(`  Admin Panel →  http://localhost:${PORT}/admin`);
+        await initDefaults();
+    });
+}
+
+module.exports = app;
