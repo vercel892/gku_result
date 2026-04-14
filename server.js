@@ -23,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ── Root & named routes ─────────────────────────────────────────────────────
 app.get('/',      (_req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/results', (_req, res) => res.sendFile(path.join(__dirname, 'result.html')));
 app.get('/admin', (_req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 
 // ── Static file serving ─────────────────────────────────────────────────────
