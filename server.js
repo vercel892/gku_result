@@ -34,10 +34,12 @@ app.get('/admin', (_req, res) => res.sendFile(path.join(__dirname, 'admin.html')
 // ── Static file serving ─────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname)));
 
-// ── Uploads folder ────────────────────────────────────────────────────────────
+// ── Uploads folder (Only for local development) ──────────────────────────────
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-app.use('/uploads', express.static(UPLOAD_DIR));
+if (!process.env.VERCEL) {
+    if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+    app.use('/uploads', express.static(UPLOAD_DIR));
+}
 
 // ── Multer (Memory storage for Vercel, Disk for local) ───────────────────────
 const storage = (process.env.VERCEL || process.env.NODE_ENV === 'production')
