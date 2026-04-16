@@ -515,12 +515,14 @@ async function initDefaults() {
 
 // ── Start server ────────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-    app.listen(PORT, async () => {
+    app.listen(PORT, () => {
         log(`GKU Result System running on http://localhost:${PORT}`);
-        log(`  Main Site   →  http://localhost:${PORT}`);
-        log(`  Admin Panel →  http://localhost:${PORT}/admin`);
-        await initDefaults();
     });
 }
+
+// Ensure defaults (like admin account) are created on all environments (Vercel & Local)
+initDefaults();
+
+module.exports = app;
 
 module.exports = app;
