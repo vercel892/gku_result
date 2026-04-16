@@ -1119,7 +1119,7 @@
     // ═══════════════════════════════════════════════════════════
     //  CONFIG
     // ═══════════════════════════════════════════════════════════
-    const API = 'http://localhost:3001';
+    const API = window.location.origin;
     let authToken = sessionStorage.getItem('gku_admin_token');
     let allStudents = [];
     let allResults = [];
@@ -1175,7 +1175,7 @@
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('main-content').style.display = 'block';
         initDashboard();
-      } catch { errEl.textContent = 'Cannot connect to server. Is it running on port 3001?'; errEl.style.display = 'block'; }
+      } catch { errEl.textContent = 'Cannot connect to server. Please check your internet connection.'; errEl.style.display = 'block'; }
       finally { btn.disabled = false; btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Sign In'; }
     }
 

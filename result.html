@@ -357,7 +357,7 @@
 
     <script>
         // ── Config ──────────────────────────────────────────────────
-        var GKU_API = 'http://localhost:3001';
+        var GKU_API = window.location.origin;
         var _token = null;
         var _student = null;
         var _sems = [];
@@ -425,7 +425,7 @@
                 grpLoadSems();
             })
             .catch(function(){
-                errEl.textContent = 'Cannot connect to the server. Please ensure the result server is running (port 3001).';
+                errEl.textContent = 'Cannot connect to the server. Please check your internet connection.';
                 errEl.classList.add('show');
                 btn.disabled = false; btn.textContent = 'Sign in';
             });

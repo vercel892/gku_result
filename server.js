@@ -4,6 +4,7 @@ const cors     = require('cors');
 const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
 const multer   = require('multer');
+const { put, del } = require('@vercel/blob');
 // Suppress verbose logs — only errors and API activity shown
 const _log = console.log;
 console.log = () => {}; // silence all console.log calls below
@@ -14,7 +15,11 @@ const pool     = require('./db');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || 'GKU_RESULT_JWT_SECRET_2024_TALWANDI_SABO';
+
+// SECURE JWT SECRET: Fallback only for local development
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' 
+    ? (()=>{ throw new Error('JWT_SECRET must be set in production!'); })()
+    : 'GKU_DEVELOPMENT_SECRET_KEY_123');
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors({ origin: '*' }));
@@ -34,14 +39,17 @@ const UPLOAD_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 app.use('/uploads', express.static(UPLOAD_DIR));
 
-// ── Multer (PDF uploads only, max 10 MB) ─────────────────────────────────────
-const storage = multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
-    filename:    (_req, file,  cb) => {
-        const uid = `${Date.now()}_${Math.round(Math.random() * 1e9)}`;
-        cb(null, `sem_result_${uid}${path.extname(file.originalname)}`);
-    },
-});
+// ── Multer (Memory storage for Vercel, Disk for local) ───────────────────────
+const storage = (process.env.VERCEL || process.env.NODE_ENV === 'production')
+    ? multer.memoryStorage() // Vercel uses memory + Blob
+    : multer.diskStorage({   // Local uses disks
+        destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
+        filename:    (_req, file,  cb) => {
+            const uid = `${Date.now()}_${Math.round(Math.random() * 1e9)}`;
+            cb(null, `sem_result_${uid}${path.extname(file.originalname)}`);
+        },
+    });
+
 const upload = multer({
     storage,
     fileFilter: (_req, file, cb) => {
@@ -294,8 +302,14 @@ app.delete('/api/admin/students/:id', requireAdmin, async (req, res) => {
         const pdfs = await pool.query('SELECT pdf_path FROM results WHERE student_id=$1', [req.params.id]);
         for (const { pdf_path } of pdfs.rows) {
             if (pdf_path) {
-                const fp = path.join(UPLOAD_DIR, path.basename(pdf_path));
-                if (fs.existsSync(fp)) fs.unlinkSync(fp);
+                if (pdf_path.startsWith('http')) {
+                    // Delete from Vercel Blob
+                    try { await del(pdf_path); } catch (e) { _log(`[BLOB DEL ERROR] ${e.message}`); }
+                } else {
+                    // Delete from local disk
+                    const fp = path.join(UPLOAD_DIR, path.basename(pdf_path));
+                    if (fs.existsSync(fp)) fs.unlinkSync(fp);
+                }
             }
         }
         await pool.query('DELETE FROM students WHERE id=$1', [req.params.id]);
@@ -327,8 +341,13 @@ app.post('/api/admin/results', requireAdmin, async (req, res) => {
         if (existing.rows.length) {
             // Remove old PDF if switching to marks
             if (existing.rows[0].pdf_path) {
-                const fp = path.join(UPLOAD_DIR, path.basename(existing.rows[0].pdf_path));
-                if (fs.existsSync(fp)) fs.unlinkSync(fp);
+                const oldPath = existing.rows[0].pdf_path;
+                if (oldPath.startsWith('http')) {
+                    try { await del(oldPath); } catch (e) { _log(`[BLOB DEL ERROR] ${e.message}`); }
+                } else {
+                    const fp = path.join(UPLOAD_DIR, path.basename(oldPath));
+                    if (fs.existsSync(fp)) fs.unlinkSync(fp);
+                }
             }
             await pool.query(
                 `UPDATE results
@@ -367,7 +386,17 @@ app.post('/api/admin/results/pdf', requireAdmin, upload.single('pdf'), async (re
         if (!req.file)
             return res.status(400).json({ error: 'PDF file is required.' });
 
-        const pdfPath = `/uploads/${req.file.filename}`;
+        let pdfPath = '';
+        if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+            // Upload to Vercel Blob
+            const blob = await put(`results/sem_result_${Date.now()}.pdf`, req.file.buffer, {
+                access: 'public',
+            });
+            pdfPath = blob.url;
+        } else {
+            // Local fallback
+            pdfPath = `/uploads/${req.file.filename}`;
+        }
 
         const existing = await pool.query(
             'SELECT id, pdf_path FROM results WHERE student_id=$1 AND semester=$2',
@@ -376,9 +405,14 @@ app.post('/api/admin/results/pdf', requireAdmin, upload.single('pdf'), async (re
 
         if (existing.rows.length) {
             // Remove old PDF
-            if (existing.rows[0].pdf_path) {
-                const fp = path.join(UPLOAD_DIR, path.basename(existing.rows[0].pdf_path));
-                if (fs.existsSync(fp)) fs.unlinkSync(fp);
+            const oldPath = existing.rows[0].pdf_path;
+            if (oldPath) {
+                if (oldPath.startsWith('http')) {
+                    try { await del(oldPath); } catch (e) { _log(`[BLOB DEL ERROR] ${e.message}`); }
+                } else {
+                    const fp = path.join(UPLOAD_DIR, path.basename(oldPath));
+                    if (fs.existsSync(fp)) fs.unlinkSync(fp);
+                }
             }
             await pool.query(
                 `UPDATE results
@@ -402,7 +436,7 @@ app.post('/api/admin/results/pdf', requireAdmin, upload.single('pdf'), async (re
         res.status(201).json({ message: 'PDF uploaded successfully.', pdf_path: pdfPath });
     } catch (err) {
         _log(`[ERROR] admin/results/pdf: ${err.message}`);
-        if (req.file) {
+        if (req.file && !req.file.buffer) { // Only unlink if it was a disk file
             const fp = path.join(UPLOAD_DIR, req.file.filename);
             if (fs.existsSync(fp)) fs.unlinkSync(fp);
         }
@@ -434,8 +468,13 @@ app.delete('/api/admin/results/:id', requireAdmin, async (req, res) => {
         const { rows } = await pool.query('SELECT pdf_path FROM results WHERE id=$1', [req.params.id]);
         if (!rows.length) return res.status(404).json({ error: 'Result not found.' });
         if (rows[0].pdf_path) {
-            const fp = path.join(UPLOAD_DIR, path.basename(rows[0].pdf_path));
-            if (fs.existsSync(fp)) fs.unlinkSync(fp);
+            const oldPath = rows[0].pdf_path;
+            if (oldPath.startsWith('http')) {
+                try { await del(oldPath); } catch (e) { _log(`[BLOB DEL ERROR] ${e.message}`); }
+            } else {
+                const fp = path.join(UPLOAD_DIR, path.basename(oldPath));
+                if (fs.existsSync(fp)) fs.unlinkSync(fp);
+            }
         }
         await pool.query('DELETE FROM results WHERE id=$1', [req.params.id]);
         res.json({ message: 'Result deleted.' });
