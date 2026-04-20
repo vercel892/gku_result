@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>Admin Panel — GKU Result System</title>
   <link rel="icon" href="https://www.gku.ac.in/public/frontend/images/join-logo.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -52,7 +52,7 @@
       border-radius: 3px;
     }
 
-    /* ── Layout ───────────────────────────────────────────── */
+    /* ── Layout (FIXED: responsive sidebar) ───────────────── */
     #sidebar {
       width: 260px;
       min-height: 100vh;
@@ -64,7 +64,68 @@
       top: 0;
       left: 0;
       z-index: 100;
-      transition: transform .3s;
+      transition: transform 0.3s ease;
+    }
+
+    /* Mobile: sidebar hidden by default */
+    @media (max-width: 768px) {
+      #sidebar {
+        transform: translateX(-100%);
+      }
+      #sidebar.open {
+        transform: translateX(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-brand {
+        gap: 8px;
+        padding: 18px 16px;
+      }
+      
+      .sidebar-brand img {
+        height: 38px;
+      }
+      
+      .sidebar-brand-text h2 {
+        font-size: 12px;
+      }
+      
+      .sidebar-brand-text p {
+        font-size: 10px;
+      }
+    }
+    /* Desktop: sidebar always visible */
+    @media (min-width: 769px) {
+      #sidebar {
+        transform: translateX(0) !important;
+      }
+    }
+
+    /* Mobile menu toggle button */
+    .mobile-menu-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 101;
+      background: var(--primary);
+      border: none;
+      color: white;
+      width: 45px;
+      height: 45px;
+      border-radius: 8px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
     }
 
     #main-content {
@@ -72,25 +133,56 @@
       flex: 1;
       min-height: 100vh;
       padding: 28px 32px;
+      width: 100%;
     }
 
-    /* ── Sidebar ──────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      #main-content {
+        margin-left: 0;
+        padding: 80px 16px 20px 16px;
+      }
+    }
+
+    /* ── Sidebar brand (FIXED: text wrapping) ─────────────── */
     .sidebar-brand {
       padding: 22px 20px 18px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-wrap: nowrap;
+      overflow: hidden;
     }
 
     .sidebar-brand img {
       height: 44px;
+      width: auto;
+      flex-shrink: 0;
       filter: brightness(0) invert(1);
     }
 
-    .sidebar-brand-text h2 { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sidebar-brand-text p { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-brand-text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
 
+    .sidebar-brand-text h2 { 
+      font-size: 14px; 
+      font-weight: 700; 
+      color: var(--text); 
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-brand-text p { 
+      font-size: 11px; 
+      color: var(--muted); 
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .sidebar-nav {
       padding: 16px 12px;
       flex: 1;
@@ -153,7 +245,7 @@
       display: block;
     }
 
-    /* ── Login screen ─────────────────────────────────────── */
+    /* ── Login screen (FIXED: NAAC text overflow) ─────────── */
     #login-screen {
       position: fixed;
       inset: 0;
@@ -175,6 +267,12 @@
       box-shadow: var(--shadow);
     }
 
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 30px 20px;
+      }
+    }
+
     .login-logo {
       text-align: center;
       margin-bottom: 28px;
@@ -183,18 +281,30 @@
     .login-logo img {
       height: 60px;
       filter: brightness(0) invert(1);
+      max-width: 100%;
     }
 
     .login-logo h1 {
       font-size: 20px;
       font-weight: 800;
       margin-top: 12px;
+      word-break: break-word;
     }
 
     .login-logo p {
       font-size: 13px;
       color: var(--muted);
       margin-top: 4px;
+      word-break: break-word;
+    }
+
+    /* FIXED: NAAC A++ text - now wraps properly */
+    .login-logo .accreditation-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
     }
 
     .badge-admin {
@@ -321,7 +431,7 @@
       justify-content: center;
     }
 
-    /* ── Cards & Sections ────────────────────────────────── */
+    /* ── Cards & Sections (FIXED: overflow issues) ────────── */
     .page-header {
       margin-bottom: 24px;
     }
@@ -329,12 +439,14 @@
     .page-header h1 {
       font-size: 22px;
       font-weight: 800;
+      word-break: break-word;
     }
 
     .page-header p {
       color: var(--muted);
       font-size: 14px;
       margin-top: 4px;
+      word-break: break-word;
     }
 
     .card {
@@ -343,6 +455,7 @@
       border-radius: var(--radius);
       padding: 24px;
       margin-bottom: 20px;
+      overflow-x: auto;
     }
 
     .card-title {
@@ -352,18 +465,35 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .card-title i {
       color: var(--primary);
     }
 
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: center; }
+    /* Stats grid - responsive */
+    .stat-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 16px; 
+      margin-bottom: 24px; 
+    }
+    
+    .stat-card { 
+      background: var(--card); 
+      border: 1px solid var(--border); 
+      border-radius: var(--radius); 
+      padding: 20px; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+    }
 
     .stat-card .stat-val {
       font-size: 32px;
       font-weight: 800;
+      word-break: break-word;
     }
 
     .stat-card .stat-lab {
@@ -372,6 +502,7 @@
       margin-top: 4px;
       text-transform: uppercase;
       letter-spacing: .5px;
+      word-break: break-word;
     }
 
     .stat-card .stat-icon {
@@ -391,19 +522,37 @@
       color: var(--gold);
     }
 
-    /* ── Table ────────────────────────────────────────────── */
+    /* ── Table (responsive) ───────────────────────────────── */
     .tbl-wrap {
       overflow-x: auto;
+      width: 100%;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
+      min-width: 600px;
     }
 
-    table th { padding: 12px 14px; text-align: left; background: rgba(255,255,255,0.04); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-    table td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+    table th { 
+      padding: 12px 14px; 
+      text-align: left; 
+      background: rgba(255,255,255,0.04); 
+      color: var(--muted); 
+      font-size: 11px; 
+      text-transform: uppercase; 
+      letter-spacing: .5px; 
+      border-bottom: 1px solid var(--border); 
+      white-space: nowrap; 
+    }
+    
+    table td { 
+      padding: 11px 14px; 
+      border-bottom: 1px solid var(--border); 
+      color: var(--text); 
+      vertical-align: middle; 
+    }
 
     table tr:hover td {
       background: rgba(255, 255, 255, 0.03);
@@ -423,6 +572,7 @@
       border-radius: 20px;
       font-size: 11px;
       font-weight: 700;
+      white-space: nowrap;
     }
 
     .badge-pass {
@@ -464,6 +614,17 @@
       padding: 4px;
       margin-bottom: 22px;
       width: fit-content;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 480px) {
+      .tab-bar {
+        width: 100%;
+      }
+      .tab-btn {
+        flex: 1;
+        text-align: center;
+      }
     }
 
     .tab-btn {
@@ -488,6 +649,7 @@
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 12px;
+      min-width: 500px;
     }
 
     .subject-table th {
@@ -650,6 +812,7 @@
 
     .search-bar .form-control {
       max-width: 280px;
+      flex: 1 1 200px;
     }
 
     /* ── Page visibility ──────────────────────────────────── */
@@ -701,26 +864,7 @@
       display: flex;
       gap: 10px;
       justify-content: center;
-    }
-
-    /* ── Responsive ───────────────────────────────────────── */
-    @media (max-width: 768px) {
-      #sidebar {
-        transform: translateX(-100%);
-      }
-
-      #sidebar.open {
-        transform: translateX(0);
-      }
-
-      #main-content {
-        margin-left: 0;
-        padding: 20px 16px;
-      }
-
-      .stat-grid {
-        grid-template-columns: 1fr 1fr;
-      }
+      flex-wrap: wrap;
     }
 
     /* ── Grid ─────────────────────────────────────────────── */
@@ -730,11 +874,20 @@
       flex-wrap: wrap;
     }
 
-    .col-6 { flex: 1; min-width: 320px; max-width: 100%; }
+    .col-6 { 
+      flex: 1; 
+      min-width: 280px; 
+      max-width: 100%; 
+    }
   </style>
 </head>
 
 <body>
+
+  <!-- Mobile menu toggle button (ADDED for responsive navbar) -->
+  <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="toggleMobileSidebar()">
+    <i class="fa fa-bars"></i>
+  </button>
 
   <!-- ── Toast Container ─────────────────────────────────── -->
   <div id="toast-container"></div>
@@ -759,24 +912,28 @@
           onerror="this.style.display='none'">
         <h1>GKU Result System</h1>
         <p>Guru Kashi University, Talwandi Sabo</p>
-        <span class="badge-admin">Admin Portal</span>
+        <!-- FIXED: NAAC text now properly wrapped -->
+        <div class="accreditation-wrapper">
+          <span class="badge-admin" style="background: var(--gold); color: #000;">NAAC A++ GRADE</span>
+          <span class="badge-admin">ACCREDITED UNIVERSITY</span>
+        </div>
+        <span class="badge-admin">ADMIN PORTAL</span>
       </div>
       <div id="login-error"
         style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#FCA5A5;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none;">
       </div>
       <div class="form-group">
-        <label>Username</label>
-        <input type="text" id="adm-username" class="form-control" placeholder="admin" autocomplete="username">
+        <label>USERNAME</label>
+        <input type="text" id="adm-username" class="form-control" placeholder="1234567" autocomplete="username">
       </div>
       <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="adm-password" class="form-control" placeholder="••••••••"
+        <label>PASSWORD</label>
+        <input type="password" id="adm-password" class="form-control" placeholder="**********"
           autocomplete="current-password">
       </div>
       <button class="btn btn-primary btn-block" id="login-btn" onclick="adminLogin()">
         <i class="fa fa-sign-in-alt"></i> Sign In
       </button>
-      <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:16px;">Default: admin / admin123</p>
     </div>
   </div>
 
@@ -1017,7 +1174,7 @@
 
         <!-- Marks entry -->
         <div id="type-marks">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
             <p style="font-size:13px;color:var(--muted);">Enter subject-wise marks below. Grade is auto-calculated.</p>
             <button class="btn btn-ghost btn-sm" onclick="addSubjectRow()"><i class="fa fa-plus"></i> Add
               Subject</button>
@@ -1124,6 +1281,19 @@
     let allStudents = [];
     let allResults = [];
 
+    // Mobile sidebar toggle function (ADDED for responsive)
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('open');
+    }
+
+    // Close sidebar when clicking on nav item on mobile (ADDED)
+    function closeMobileSidebar() {
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+    }
+
     // ═══════════════════════════════════════════════════════════
     //  TOAST
     // ═══════════════════════════════════════════════════════════
@@ -1185,6 +1355,7 @@
       document.getElementById('main-content').style.display = 'none';
       document.getElementById('login-screen').style.display = 'flex';
       document.getElementById('adm-password').value = '';
+      closeMobileSidebar();
     }
 
     async function apiFetch(endpoint, opts = {}) {
@@ -1195,7 +1366,7 @@
     }
 
     // ═══════════════════════════════════════════════════════════
-    //  NAVIGATION
+    //  NAVIGATION (UPDATED: close sidebar on mobile)
     // ═══════════════════════════════════════════════════════════
     function showPage(name) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1207,6 +1378,7 @@
       if (name === 'students') loadStudents();
       if (name === 'upload') populateStudentDropdown();
       if (name === 'results') loadResults();
+      closeMobileSidebar();
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -1441,7 +1613,6 @@
         document.getElementById('subjects-body').innerHTML = '';
         subjectRows = [];
         recalcTotals();
-        // Add 5 blank rows by default
         for (let i = 0; i < 3; i++) addSubjectRow();
       } catch (e) { toast(e.message, 'error'); }
     }
@@ -1522,7 +1693,7 @@
       <td>${r.exam_session || '–'}</td>
       <td>${r.percentage ? r.percentage + '%' : '–'}</td>
       <td><span class="badge badge-${statusBadge}">${r.result_status}</span></td>
-      <td style="display:flex;gap:6px;">
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
         ${r.result_type === 'pdf' && r.pdf_path ? `<a class="btn btn-ghost btn-sm" href="${API}${r.pdf_path}" target="_blank"><i class="fa fa-eye"></i></a>` : ''}
         <button class="btn btn-danger btn-sm" onclick="deleteResult(${r.id})"><i class="fa fa-trash"></i></button>
       </td>
@@ -1563,7 +1734,6 @@
     //  INIT — check if already logged in
     // ═══════════════════════════════════════════════════════════
     window.addEventListener('DOMContentLoaded', () => {
-      // Seed default subject rows
       for (let i = 0; i < 3; i++) addSubjectRow();
 
       if (authToken) {
@@ -1572,9 +1742,19 @@
         initDashboard();
       }
 
-      // Enter key on login
       document.getElementById('adm-password').addEventListener('keypress', e => {
         if (e.key === 'Enter') adminLogin();
+      });
+      
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('mobileMenuToggle');
+        if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+          if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
+            sidebar.classList.remove('open');
+          }
+        }
       });
     });
   </script>
