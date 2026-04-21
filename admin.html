@@ -1671,7 +1671,8 @@
     async function loadResults() {
       document.getElementById('results-table').innerHTML = '<tr><td colspan="9" class="tbl-empty">Loading…</td></tr>';
       try {
-        const r = await apiFetch('/api/admin/results');
+        // Cache-busting: add timestamp to avoid 304 if data has changed
+        const r = await apiFetch(`/api/admin/results?t=${Date.now()}`);
         const d = await r.json();
         allResults = d.results || [];
         renderResultsTable(allResults);
@@ -1693,8 +1694,11 @@
       <td>${r.exam_session || '–'}</td>
       <td>${r.percentage ? r.percentage + '%' : '–'}</td>
       <td><span class="badge badge-${statusBadge}">${r.result_status}</span></td>
-      <td style="display:flex;gap:6px;flex-wrap:wrap;">
-        ${r.result_type === 'pdf' && r.pdf_path ? `<a class="btn btn-ghost btn-sm" href="${API}${r.pdf_path}" target="_blank"><i class="fa fa-eye"></i></a>` : ''}
+  <td style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${r.result_type === 'pdf' && r.pdf_path ? `
+          <a class="btn btn-ghost btn-sm" href="${r.pdf_path.startsWith('http') ? r.pdf_path : API + r.pdf_path}" target="_blank">
+            <i class="fa fa-eye"></i>
+          </a>` : ''}
         <button class="btn btn-danger btn-sm" onclick="deleteResult(${r.id})"><i class="fa fa-trash"></i></button>
       </td>
     </tr>`;

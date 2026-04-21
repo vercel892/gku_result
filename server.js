@@ -5,10 +5,9 @@ const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
 const multer   = require('multer');
 const { put, del } = require('@vercel/blob');
-// Suppress verbose logs — only errors and API activity shown
+// Logging enabled for Vercel debugging
+const log = console.log;
 const _log = console.log;
-console.log = () => {}; // silence all console.log calls below
-const log = (...a) => _log(...a); // internal logger (always visible)
 const path     = require('path');
 const fs       = require('fs');
 const pool     = require('./db');
@@ -457,9 +456,10 @@ app.get('/api/admin/results', requireAdmin, async (req, res) => {
              JOIN   students s ON r.student_id = s.id
              ORDER  BY s.roll_no, r.semester ASC`
         );
+        log(`[DB] Fetched ${rows.length} results from database.`);
         res.json({ results: rows });
     } catch (err) {
-        _log(`[ERROR] admin/results GET: ${err.message}`);
+        console.error(`[ERROR] admin/results GET: ${err.message}`);
         res.status(500).json({ error: 'Server error.' });
     }
 });
@@ -522,7 +522,5 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
 
 // Ensure defaults (like admin account) are created on all environments (Vercel & Local)
 initDefaults();
-
-module.exports = app;
 
 module.exports = app;
