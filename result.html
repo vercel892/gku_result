@@ -517,13 +517,15 @@
                 var isImg = path.endsWith('.jpg') || path.endsWith('.jpeg') || path.endsWith('.png') || path.endsWith('.webp') || path.endsWith('.gif');
                 
                 if(isImg) {
+                    var fullPath = r.pdf_path.startsWith('http') ? r.pdf_path : GKU_API + r.pdf_path;
                     body = '<div style="margin: 20px 0; text-align:center;">' +
-                           '<img src="' + GKU_API + r.pdf_path + '" style="max-width:100%; height:auto; border:1px solid #ddd; border-radius:4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">' +
+                           '<img src="' + fullPath + '" style="max-width:100%; height:auto; border:1px solid #ddd; border-radius:4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">' +
                            '</div>';
                 } else {
                     // Hide PDF toolbar and controls
+                    var fullPath = r.pdf_path.startsWith('http') ? r.pdf_path : GKU_API + r.pdf_path;
                     body = '<div style="margin: 20px 0; overflow:hidden;">' +
-                           '<iframe src="' + GKU_API + r.pdf_path + '#toolbar=0&navpanes=0&scrollbar=0" style="width:100%; height:800px; border:1px solid #ddd; margin-bottom:20px;"></iframe>' +
+                           '<iframe src="' + fullPath + '#toolbar=0&navpanes=0&scrollbar=0" style="width:100%; height:800px; border:1px solid #ddd; margin-bottom:20px;"></iframe>' +
                            '</div>';
                 }
             } else if(r.subjects) {
